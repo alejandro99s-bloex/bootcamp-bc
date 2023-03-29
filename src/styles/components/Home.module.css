@@ -1,0 +1,27 @@
+.home_body {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.home_body_element_color_deny {
+    background-color: #be4e4e;
+    opacity: 0.5;
+}
+
+.home_body_element_color_approved {
+    background-color: #329415;
+    cursor: pointer;
+}
+
+
+.home_body_element {
+    color: white;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+    padding: 1rem;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    max-width: 16rem;
+}
