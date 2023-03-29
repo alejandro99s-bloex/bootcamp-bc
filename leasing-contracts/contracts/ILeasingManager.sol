@@ -24,7 +24,7 @@ interface ILeasingManager {
     function lockLeasingRigth(uint256 tokenId) external payable;
     function contribute(uint256 tokenId) external payable;
     function yieldLeasingRigth(uint256 tokenId) external;
-    function getLeasingFromSecondaryMarket(uint256 tokenId) external; 
+    function getLeasingFromSecondaryMarket(uint256 tokenId) external payable;
     function claimLeasingRigth(uint256 tokenId) external;
     function pause() external;
     function unpause() external;

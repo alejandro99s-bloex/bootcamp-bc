@@ -123,14 +123,24 @@ contract LeasingManager is
         leasingRigth.isAvailable = true;
     }
 
-    function getLeasingFromSecondaryMarket(uint256 tokenId) external whenNotPaused {
+    function getLeasingFromSecondaryMarket(uint256 tokenId) external payable whenNotPaused {
         address sender = LeasingMangerUtils.getSenderSafe(msg.sender);
 
         LeasingRigthMetadata storage leasingRigth = leasingRigthsMap[tokenId];
+        if (leasingRigth.leaseholder == sender) revert("LeasingManager: sender is the owner");
         if (leasingRigth.leaseholder == address(0)) {
             revert("LeasingManager: leasing rigth is not available in secondary market");
         }
-        if (leasingRigth.leaseholder == sender) revert("LeasingManager: sender is the owner");
+        if (msg.value < leasingRigth.amountPaid) {
+            revert("LeasingManager: amount paid is not enough");
+        }
+
+        if (msg.value > leasingRigth.amountPaid) {
+            (bool success,) = payable(sender).call{value: leasingRigth.amountPaid}("");
+            require(success, "LeasingManager: transfer failed");
+
+            leasingRigth.amountPaid = msg.value;
+        }
 
         leasingRigth.isAvailable = true;
     }
