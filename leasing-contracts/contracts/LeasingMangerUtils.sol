@@ -12,4 +12,8 @@ library LeasingMangerUtils {
         if (_sender.code.length > 0) revert("LeasingManagerUtils: Sender is a contract");
         return _sender;
     }
+
+    function buildUrl(string memory baseUrl, address _param) internal pure returns (string memory) {
+        return string.concat(baseUrl, addressToString(_param));
+    }
 }

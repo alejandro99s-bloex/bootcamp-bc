@@ -2,6 +2,7 @@
 pragma solidity 0.8.16;
 
 struct LeasingRigthMetadata {
+    uint256 leasingRigthId;
     string tokenUri;
     string name;
     string symbol;

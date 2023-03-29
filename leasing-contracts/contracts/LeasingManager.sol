@@ -5,7 +5,6 @@ import "../node_modules/@openzeppelin/contracts/security/Pausable.sol";
 import "../node_modules/@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "../node_modules/@openzeppelin/contracts/access/AccessControl.sol";
 import "../node_modules/@openzeppelin/contracts/utils/Counters.sol";
-import "../node_modules/@openzeppelin/contracts/utils/Address.sol";
 import "../node_modules/@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 import "../node_modules/@chainlink/contracts/src/v0.8/ConfirmedOwner.sol";
 //
@@ -26,23 +25,28 @@ contract LeasingManager is
     using Counters for Counters.Counter;
     using Chainlink for Chainlink.Request;
 
-    Counters.Counter private _tokenIdCounter;
-
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+
+    Counters.Counter private _tokenIdCounter;
 
     ChainLinkDataHolder private chainLinkDataHolder;
 
     mapping(uint256 => LeasingRigthMetadata) public leasingRigthsMap;
-    mapping(address => uint256) public leasingRigthsByOwner;
     LeasingRigthMetadata[] private leasingRigths;
 
-    LeasingRigthMetadata private leasingRigthCache;
+    string baseUrl = "https://6422fadc001cb9fc203510d6.mockapi.io/api/v1/users/";
 
-    event RequestVolume(bytes32 indexed requestId, uint256 volume);
-    event LeasingRigthLocked(uint256 indexed leasingId, address indexed owner);
-    event LeasingCreated(uint256 indexed leasingId);
-    event ContributionAdded(uint256 indexed leasingId, uint256 amount);
-    event LeasingClaimed(uint256 indexed leasingId, address indexed owner);
+    uint256 leasingIdCache;
+
+    modifier notContractCaller() {
+        require(msg.sender.code.length == 0, "LeasingManager: Sender is a contract");
+        _;
+    }
+
+    modifier onlyLeaseholder(uint256 tokenId) {
+        require(msg.sender == leasingRigthsMap[tokenId].leaseholder, "LeasingManager: sender is not the leaseholder");
+        _;
+    }
 
     constructor() ConfirmedOwner(msg.sender) {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
@@ -58,137 +62,119 @@ contract LeasingManager is
         uint256 price,
         uint256 minimumContribution
     ) external onlyRole(DEFAULT_ADMIN_ROLE) returns (uint256) {
-        uint256 leasingId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
 
+        uint256 tokenId = _tokenIdCounter.current();
+
         LeasingRigthMetadata memory leasingRigth = LeasingRigthMetadata({
+            leasingRigthId: tokenId,
             tokenUri: tokenUri,
             name: name,
             symbol: symbol,
             price: price,
-            amountPaid: 0,
             minimumContribution: minimumContribution,
+            amountPaid: 0,
             leaseholder: address(0),
             isAvailable: true,
             leasingRigthAddress: address(0)
         });
 
-        leasingRigthsMap[leasingId] = leasingRigth;
+        leasingRigthsMap[tokenId] = leasingRigth;
         leasingRigths.push(leasingRigth);
 
-        return leasingId;
+        return tokenId;
     }
 
-    function lockLeasingRigth(uint256 leasingId) external payable override whenNotPaused {
-        address sender = LeasingMangerUtils.getSenderSafe(msg.sender);
+    function lockLeasingRigth(uint256 leasingId) external payable override whenNotPaused notContractCaller {
+        LeasingRigthMetadata memory leasingRigth = leasingRigthsMap[leasingId];
 
-        leasingRigthCache = leasingRigthsMap[leasingId];
-        if (leasingRigthCache.leaseholder != address(0)) revert("LeasingManager: leasing rigth is already locked");
-        if (!leasingRigthCache.isAvailable) revert("LeasingManager: leasing rigth is not available");
-        if (msg.value < leasingRigthCache.minimumContribution) {
-            revert("LeasingManager: minimum contribution is required");
-        }
+        require(leasingRigth.isAvailable, "LeasingManager: rigth is not available");
 
-        leasingRigthCache.leaseholder = sender;
-        leasingRigthCache.amountPaid = msg.value;
+        leasingIdCache = leasingId;
 
-        requestVolumeData(LeasingMangerUtils.addressToString(sender), chainLinkDataHolder.jobId());
+        string memory url = LeasingMangerUtils.buildUrl(baseUrl, msg.sender);
+        bytes32 jobId = chainLinkDataHolder.getJobId();
+        requestVolumeData(url, jobId);
     }
 
-    function _lockLeasingRigth(uint256 userQuota) internal {
-        if (userQuota == 0) revert("LeasingManager: userQuota is not set");
-        if (userQuota >= leasingRigthCache.price) revert("LeasingManager: userQuota is not enough");
-
-        leasingRigthCache.isAvailable = false;
-    }
-
-    function contribute(uint256 tokenId) external payable whenNotPaused {
-        address sender = LeasingMangerUtils.getSenderSafe(msg.sender);
-
+    function contribute(uint256 tokenId) external payable whenNotPaused notContractCaller onlyLeaseholder(tokenId) {
         LeasingRigthMetadata storage leasingRigth = leasingRigthsMap[tokenId];
-        if (leasingRigth.leaseholder != sender) revert("LeasingManager: sender is not the owner");
-        if (leasingRigth.isAvailable) revert("LeasingManager: leasing rigth is available");
 
         leasingRigth.amountPaid += msg.value;
-        emit ContributionAdded(tokenId, msg.value);
     }
 
-    function yieldLeasingRigth(uint256 tokenId) external whenNotPaused {
-        address sender = LeasingMangerUtils.getSenderSafe(msg.sender);
-
+    function yieldLeasingRigth(uint256 tokenId) external whenNotPaused onlyLeaseholder(tokenId) {
         LeasingRigthMetadata storage leasingRigth = leasingRigthsMap[tokenId];
-        if (leasingRigth.leaseholder != sender) revert("LeasingManager: sender is not the owner");
-        if (leasingRigth.isAvailable) revert("LeasingManager: leasing rigth is available");
 
         leasingRigth.isAvailable = true;
     }
 
-    function getLeasingFromSecondaryMarket(uint256 tokenId) external payable whenNotPaused {
-        address sender = LeasingMangerUtils.getSenderSafe(msg.sender);
-
+    function getLeasingFromSecondaryMarket(uint256 tokenId) external payable whenNotPaused notContractCaller {
         LeasingRigthMetadata storage leasingRigth = leasingRigthsMap[tokenId];
-        if (leasingRigth.leaseholder == sender) revert("LeasingManager: sender is the owner");
-        if (leasingRigth.leaseholder == address(0)) {
-            revert("LeasingManager: leasing rigth is not available in secondary market");
-        }
-        if (msg.value < leasingRigth.amountPaid) {
-            revert("LeasingManager: amount paid is not enough");
-        }
 
-        if (msg.value > leasingRigth.amountPaid) {
-            (bool success,) = payable(sender).call{value: leasingRigth.amountPaid}("");
-            require(success, "LeasingManager: transfer failed");
+        require(leasingRigth.isAvailable, "LeasingManager: rigth is not available");
+        require(msg.value >= leasingRigth.amountPaid, "LeasingManager: amount paid is less than price");
 
-            leasingRigth.amountPaid = msg.value;
+        uint256 amountToRefund = msg.value - leasingRigth.amountPaid;
+        if (amountToRefund > 0) {
+            (bool success,) = payable(msg.sender).call{value: amountToRefund}("");
+            require(success, "LeasingManager: refund failed");
         }
 
-        leasingRigth.isAvailable = true;
+        leasingRigth.leaseholder = msg.sender;
+        leasingRigth.isAvailable = false;
     }
 
-    function claimLeasingRigth(uint256 tokenId) external nonReentrant {
-        address sender = LeasingMangerUtils.getSenderSafe(msg.sender);
-
+    function claimLeasingRigth(uint256 tokenId) external nonReentrant onlyLeaseholder(tokenId) {
         LeasingRigthMetadata storage leasingRigth = leasingRigthsMap[tokenId];
-        if (leasingRigth.leaseholder != sender) revert("LeasingManager: sender is not the owner");
-        if (leasingRigth.amountPaid < leasingRigth.price) revert("LeasingManager: amount paid is not enough");
 
-        if (leasingRigth.amountPaid > leasingRigth.price) {
-            (bool success,) = payable(sender).call{value: leasingRigth.amountPaid - leasingRigth.price}("");
-            require(success, "LeasingManager: transfer failed");
+        require(leasingRigth.amountPaid >= leasingRigth.price, "LeasingManager: amount paid is less than price");
+
+        uint256 amountToRefund = leasingRigth.amountPaid - leasingRigth.price;
+        if (amountToRefund > 0) {
+            (bool success,) = payable(leasingRigth.leaseholder).call{value: amountToRefund}("");
+            require(success, "LeasingManager: refund failed");
         }
 
         LeasingRigth leasingRigthContract = new LeasingRigth(
-            leasingRigth.name,
-            leasingRigth.symbol
+            leasingRigth.tokenUri,
+            leasingRigth.name
         );
-        leasingRigthContract.safeMint(sender, tokenId, leasingRigth.tokenUri);
-
-        leasingRigth.leasingRigthAddress = address(leasingRigthContract);
-        leasingRigthsByOwner[sender] = tokenId;
-
-        emit LeasingClaimed(tokenId, sender);
+        leasingRigthContract.safeMint(leasingRigth.leaseholder, tokenId, leasingRigth.tokenUri);
     }
 
-    function requestVolumeData(string memory _userAddress, bytes32 _jobId) public returns (bytes32 requestId) {
+    function getAllLeasingRigths() external view returns (LeasingRigthMetadata[] memory) {
+        return leasingRigths;
+    }
+
+    function requestVolumeData(string memory url, bytes32 _jobId) public returns (bytes32 requestId) {
         Chainlink.Request memory req = buildChainlinkRequest(_jobId, address(this), this.fulfill.selector);
 
-        string memory endpoint =
-            string.concat("https://6422fadc001cb9fc203510d6.mockapi.io/api/v1/users/", _userAddress);
-
-        req.add("get", endpoint);
-        req.add("path", "amount");
+        req.add("get", url);
+        req.add("path", "user,capacity");
         req.addInt("times", 1);
 
-        return sendChainlinkRequest(req, chainLinkDataHolder.fee());
+        return sendChainlinkRequest(req, chainLinkDataHolder.getFee());
     }
 
     function fulfill(bytes32 _requestId, uint256 _volume) public recordChainlinkFulfillment(_requestId) {
-        emit RequestVolume(_requestId, _volume);
         _lockLeasingRigth(_volume);
     }
 
+    function _lockLeasingRigth(uint256 userQuota) internal {
+        LeasingRigthMetadata storage leasingRigth = leasingRigthsMap[leasingIdCache];
+
+        require(leasingRigth.isAvailable, "LeasingManager: rigth is not available");
+        require(userQuota >= leasingRigth.price, "LeasingManager: value sent is less than the price");
+        require(msg.value >= leasingRigth.minimumContribution, "LeasingManager: inimum contribution required");
+
+        leasingRigthsMap[1].isAvailable = false;
+        leasingRigthsMap[1].leaseholder = msg.sender;
+        leasingRigthsMap[1].amountPaid = msg.value;
+    }
+
     function withdrawLink() public onlyOwner {
-        LinkTokenInterface link = LinkTokenInterface(chainlinkTokenAddress());
+        LinkTokenInterface link = LinkTokenInterface(chainLinkDataHolder.getChainLinkToken());
         require(link.transfer(msg.sender, link.balanceOf(address(this))), "Unable to transfer");
     }
 
