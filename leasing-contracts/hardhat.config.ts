@@ -1,6 +1,7 @@
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 import "@nomicfoundation/hardhat-foundry";
+import "hardhat-abi-exporter";
 
 import dotenv from "dotenv";
 dotenv.config();
@@ -28,6 +29,13 @@ const config: HardhatUserConfig = {
 	},
 	etherscan: {
 		apiKey: mumbaiExplorer,
+	},
+	abiExporter: {
+		path: "./data/abi",
+		runOnCompile: true,
+		clear: true,
+		spacing: 2,
+		pretty: true,
 	},
 };
 
