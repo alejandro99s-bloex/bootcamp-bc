@@ -1,0 +1,76 @@
+{
+    "houses": [
+        {
+            "name": "Inmueble A",
+            "price": 120000000,
+            "minimumContribution": 1000000,
+            "isAvailable": true
+        },
+        {
+            "name": "Inmueble B",
+            "price": 180000000,
+            "minimumContribution": 1000000,
+            "isAvailable": true
+        },
+        {
+            "name": "Inmueble C",
+            "price": 110000000,
+            "minimumContribution": 1000000,
+            "isAvailable": true
+        },
+        {
+            "name": "Inmueble D",
+            "price": 160000000,
+            "minimumContribution": 1000000,
+            "isAvailable": true
+        },
+        {
+            "name": "Inmueble E",
+            "price": 120000000,
+            "minimumContribution": 1000000,
+            "isAvailable": true
+        },
+        {
+            "name": "Inmueble F",
+            "price": 180000000,
+            "minimumContribution": 1000000,
+            "isAvailable": true
+        },
+        {
+            "name": "Inmueble G",
+            "price": 110000000,
+            "minimumContribution": 1000000,
+            "isAvailable": true
+        },
+        {
+            "name": "Inmueble H",
+            "price": 160000000,
+            "minimumContribution": 1000000,
+            "isAvailable": true
+        },
+        {
+            "name": "Inmueble I",
+            "price": 120000000,
+            "minimumContribution": 1000000,
+            "isAvailable": true
+        },
+        {
+            "name": "Inmueble J",
+            "price": 180000000,
+            "minimumContribution": 1000000,
+            "isAvailable": true
+        },
+        {
+            "name": "Inmueble K",
+            "price": 110000000,
+            "minimumContribution": 1000000,
+            "isAvailable": true
+        },
+        {
+            "name": "Inmueble L",
+            "price": 160000000,
+            "minimumContribution": 1000000,
+            "isAvailable": true
+        }
+    ]
+}

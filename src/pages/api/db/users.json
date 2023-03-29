@@ -1,0 +1,22 @@
+{
+    "users": [
+        {
+            "address": "0x820faec66a504901de79fa44d21609d457174f5b",
+            "name": "Alejandro S",
+            "cc": 1234567890,
+            "capacity": 150000000
+        },
+        {
+            "address": "0x7bE42B52a9A5225e5c32EED8856f8ed46e3D2849",
+            "name": "Alejandro T",
+            "cc": 5678901234,
+            "capacity": 180000000
+        },
+        {
+            "address": "0x3Bd208F4bC181439b0a6aF00C414110b5F9d2656",
+            "name": "Juan C",
+            "cc": 9012345678,
+            "capacity": 130000000
+        }
+    ]
+}
