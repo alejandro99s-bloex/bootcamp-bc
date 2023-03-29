@@ -1,0 +1,10 @@
+[
+  "function addLeasingRigth(string,string,string,uint256,uint256) returns (uint256)",
+  "function claimLeasingRigth(uint256)",
+  "function contribute(uint256) payable",
+  "function getLeasingFromSecondaryMarket(uint256) payable",
+  "function lockLeasingRigth(uint256) payable",
+  "function pause()",
+  "function unpause()",
+  "function yieldLeasingRigth(uint256)"
+]
