@@ -1,6 +1,7 @@
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 import "@nomicfoundation/hardhat-foundry";
+import "@primitivefi/hardhat-dodoc";
 import "hardhat-abi-exporter";
 
 import dotenv from "dotenv";

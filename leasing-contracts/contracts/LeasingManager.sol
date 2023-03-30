@@ -7,7 +7,7 @@ import "../node_modules/@openzeppelin/contracts/access/AccessControl.sol";
 import "../node_modules/@openzeppelin/contracts/utils/Counters.sol";
 import "../node_modules/@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 import "../node_modules/@chainlink/contracts/src/v0.8/ConfirmedOwner.sol";
-//
+
 import "./LeasingRigth.sol";
 import "./ILeasingManager.sol";
 import "./ChainLinkDataHolder.sol";
@@ -31,8 +31,9 @@ contract LeasingManager is
 
     mapping(uint256 => LeasingRigthMetadata) public leasingRigthsMap;
 
-    string baseUrl = "https://64237e6677e7062b3e32e5ef.mockapi.io/users/";
-
+    /**
+     * @notice This are helpers to handle the ChainLink request as it comes in a callback.
+     */
     uint256 leasingIdCache;
     uint256 valueCache;
     address senderCache;
@@ -60,6 +61,16 @@ contract LeasingManager is
         fee = (1 * LINK_DIVISIBILITY) / 10; // 0,1 * 10**18 (Varies by network and job)
     }
 
+    /**
+     * @notice Create new leasing rigth and return the id
+     * @dev Can be called only by the EOA with the DEFAULT_ADMIN_ROLE role
+     * @param tokenUri The token URI of the NFT
+     * @param name The name of the NFT
+     * @param symbol The symbol of the NFT
+     * @param price The price of the leasing rigth
+     * @param minimumContribution The minimum contribution to lock the leasing rigth
+     * @return tokenId The id of the new leasing rigth
+     */
     function addLeasingRigth(
         string memory tokenUri,
         string memory name,
@@ -89,6 +100,13 @@ contract LeasingManager is
         return tokenId;
     }
 
+    /**
+     * @notice Locks a leasing right identified by `leasingId` and stores relevant data in cache.
+     * @param leasingId The ID of the leasing right to lock.
+     * @dev The caller must send a minimum contribution equal to or greater than the `minimumContribution` required by the leasing right.
+     * @dev The leasing right must be available for locking, otherwise a `LeasingManager: rigth is not available` error is thrown.
+     * @dev Must be called when the contract is not paused.
+     */
     function lockLeasingRigth(uint256 leasingId) external payable override whenNotPaused {
         LeasingRigthMetadata memory leasingRigth = leasingRigthsMap[leasingId];
 
@@ -99,15 +117,27 @@ contract LeasingManager is
         valueCache = msg.value;
         senderCache = msg.sender;
 
-        // urlCache = LeasingMangerUtils.buildUrl(baseUrl, msg.sender);
         requestVolumeData();
     }
 
+    /**
+     * @dev Allows the leaseholder of a token to contribute additional funds to the leasing right paiying until the price is reached.
+     * @param tokenId The ID of the leasing right token to contribute to.
+     */
     function contribute(uint256 tokenId) external payable whenNotPaused onlyLeaseholder(tokenId) {
         LeasingRigthMetadata storage leasingRigth = leasingRigthsMap[tokenId];
 
         leasingRigth.amountPaid += msg.value;
     }
+    /**
+     * @dev Allows the leaseholder of a leasing right to yield it back to the leasing manager, making it available for other users to lease.
+     * @param tokenId uint256 ID of the leasing right token to be yielded.
+     * Requirements:
+     * The contract must not be paused.
+     * The caller must be the leaseholder of the specified leasing right.
+     * Effects:
+     * Sets the isAvailable flag of the specified leasing right to true, indicating that it is now available for lease.
+     */
 
     function yieldLeasingRigth(uint256 tokenId) external whenNotPaused onlyLeaseholder(tokenId) {
         LeasingRigthMetadata storage leasingRigth = leasingRigthsMap[tokenId];
@@ -115,6 +145,15 @@ contract LeasingManager is
         leasingRigth.isAvailable = true;
     }
 
+    /**
+     * @dev Allows a user to acquire a leasing right from the secondary market.
+     *
+     * The user must provide the ID of the leasing right to acquire and pay the required price.
+     * The function will refund any excess payment above the price of the leasing right to the previous leaseholder.
+     * The leasing right must be available for acquisition and the amount paid must be equal or greater than the amount paid by the previous leaseholder.
+     *
+     * @param tokenId The ID of the leasing right to acquire.
+     */
     function getLeasingFromSecondaryMarket(uint256 tokenId) external payable whenNotPaused {
         LeasingRigthMetadata storage leasingRigth = leasingRigthsMap[tokenId];
 
@@ -132,6 +171,23 @@ contract LeasingManager is
         leasingRigth.amountPaid = msg.value;
     }
 
+    /**
+     * @dev Allows the current leaseholder of a leasing right to claim ownership of the underlying NFT only when the price is reached.
+     *
+     * @param tokenId uint256 ID of the leasing right to claim.
+     *
+     * Requirements:
+     *
+     * The caller must be the current leaseholder of the leasing right.
+     * The amount paid must be greater than or equal to the price of the leasing right.
+     *
+     * Effects:
+     *
+     * The caller receives ownership of the underlying NFT.
+     * If the amount paid exceeds the price of the leasing right, the excess is refunded to the caller.
+     * A new instance of the LeasingRigth contract is created, minting a new NFT with the same tokenUri and name as the original leasing right.
+     * The new leasing right is assigned to the caller and its address is stored in leasingRigth.leasingRigthAddress.
+     */
     function claimLeasingRigth(uint256 tokenId) external nonReentrant onlyLeaseholder(tokenId) {
         LeasingRigthMetadata storage leasingRigth = leasingRigthsMap[tokenId];
         require(leasingRigth.amountPaid >= leasingRigth.price, "LeasingManager: amount paid is less than price");
@@ -151,6 +207,10 @@ contract LeasingManager is
         leasingRigth.leasingRigthAddress = address(leasingRigthContract);
     }
 
+    /**
+     * @dev Requests volume data from the Chainlink node and returns the requestId.
+     * @return requestId The ID of the Chainlink request.
+     */
     function requestVolumeData() public returns (bytes32 requestId) {
         Chainlink.Request memory req = buildChainlinkRequest(jobId, address(this), this.fulfill.selector);
 
@@ -161,17 +221,29 @@ contract LeasingManager is
         return sendChainlinkRequest(req, fee);
     }
 
-    uint256 public volume;
-
+    /**
+     * @dev Callback function that is called by the Chainlink node to fulfill the volume data request.
+     * @param _requestId The ID of the Chainlink request.
+     * @param _volume The volume data returned by the API.
+     */
     function fulfill(bytes32 _requestId, uint256 _volume) public recordChainlinkFulfillment(_requestId) {
         emit RequestVolume(_requestId, _volume);
-        volume = _volume;
         _lockLeasingRigth(_volume, leasingIdCache, valueCache, senderCache);
         leasingIdCache = 0;
         valueCache = 0;
         senderCache = address(0);
     }
 
+    /**
+     * @dev Locks the leasing right for the given `_leasingId` by setting `isAvailable` to false, assigning the `_sender`
+     * as the new leaseholder, and adding the `_value` to the `amountPaid` field of the leasing right. Reverts if the `userQuota`
+     * is less than the leasing right `price`.
+     *
+     * @param userQuota The user quota to check against the leasing right price
+     * @param _leasingId The ID of the leasing right to be locked
+     * @param _value The value to be added to the amountPaid field of the leasing right
+     * @param _sender The address of the new leaseholder
+     */
     function _lockLeasingRigth(uint256 userQuota, uint256 _leasingId, uint256 _value, address _sender) internal {
         LeasingRigthMetadata memory leasingRigth = leasingRigthsMap[_leasingId];
 
@@ -184,6 +256,9 @@ contract LeasingManager is
         leasingRigthsMap[_leasingId] = leasingRigth;
     }
 
+    /**
+     * @dev Withdraws any remaining LINK tokens from the contract
+     */
     function withdrawLink() public onlyOwner {
         LinkTokenInterface link = LinkTokenInterface(chainlinkTokenAddress());
         require(link.transfer(msg.sender, link.balanceOf(address(this))), "Unable to transfer");

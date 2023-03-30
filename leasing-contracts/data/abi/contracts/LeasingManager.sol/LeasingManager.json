@@ -33,7 +33,6 @@
   "function supportsInterface(bytes4) view returns (bool)",
   "function transferOwnership(address)",
   "function unpause()",
-  "function volume() view returns (uint256)",
   "function withdrawLink()",
   "function yieldLeasingRigth(uint256)"
 ]
