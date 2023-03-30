@@ -15,4 +15,14 @@
 
 .navbar_container_title {
     text-align: center;
+    margin: 0 1rem;
+}
+
+.navbar_container_myProfile {
+    margin: 0 1rem;
+    padding: 0.5rem 1rem;
+    background-color: white;
+    border-radius: 10px;
+    cursor: pointer;
+    width: 8rem;
 }
