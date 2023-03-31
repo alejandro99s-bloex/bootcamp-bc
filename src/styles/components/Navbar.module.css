@@ -25,4 +25,6 @@
     border-radius: 10px;
     cursor: pointer;
     width: 8rem;
+    text-align: center;
+    border: 1px solid #000000
 }
