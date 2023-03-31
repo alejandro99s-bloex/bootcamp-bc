@@ -32,8 +32,14 @@ export default function handler(
   } else if(req.method === 'POST'){
     let newHouses = houses;
     const data = req.body;
-    newHouses.houses[data.id - 1].isAvailable = true;
-    fs.writeFile("src/pages/api/db/house.json", JSON.stringify(newHouses), (e:any)=>console.log(e))
+    if (data.address) {
+      newHouses.houses[data.id - 1].leaseHolder = data.address;
+      newHouses.houses[data.id - 1].isAvailable = false;
+      fs.writeFile("src/pages/api/db/house.json", JSON.stringify(newHouses), (e:any)=>console.log(e))
+    } else {
+      newHouses.houses[data.id - 1].isAvailable = true;
+      fs.writeFile("src/pages/api/db/house.json", JSON.stringify(newHouses), (e:any)=>console.log(e))
+    }
     return res.status(200).json({ message: 'OK' })
   } else {
     return res.status(400).json({ message: "METHOT_NOT_FOUND" });

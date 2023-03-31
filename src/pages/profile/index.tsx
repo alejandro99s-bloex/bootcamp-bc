@@ -7,8 +7,6 @@ import { useAccount } from "wagmi";
 import axios from 'axios';
 import { User, HousesProps, MyHouse } from "../../types/index";
 import Loading from '@/components/loading'
-import HomeBody from '@/components/home'
-import Popup from '@/components/modal'
 import HousesProfile from '@/components/houses'
 import { readContract, writeContract } from '@wagmi/core'
 import contractInfo from "../../../contractInfo/contract.json";
@@ -23,41 +21,6 @@ export default function Profile() {
     const [userExist, setUserExist] = useState(false);
     const [houses, setHouses] = useState<Array<HousesProps> | undefined>(undefined);
     const [isLoading, setIsLoading] = useState(true);
-    const [showPopUp, setShowPopUp] = useState(false);
-    const [myHouse, setMyHouse] = useState<MyHouse>({ tokenUri: "", description: "", buttonOk: "", buttonCancel: "", onCancel: () => { }, onAccept: () => { } });
-
-
-    const myHouses = [
-        {
-            name: "Casa A",
-            price: 120000000,
-            amountPaid: 8000000
-        },
-        {
-            name: "Casa B",
-            price: 110000000,
-            amountPaid: 10000000
-        }
-    ]
-
-    const tryToBuy = (house: HousesProps, user: User) => {
-        setShowPopUp(true)
-        setMyHouse({
-            tokenUri: house.tokenUri,
-            description: `${house.name}: ${house.description}.\n¿Te gusta este inmueble?`,
-            buttonOk: "Solicitar",
-            buttonCancel: "Cancelar",
-            onCancel: () => {
-                console.log("canceled")
-                setShowPopUp(false);
-            },
-            onAccept: () => {
-                console.log("Leasing solicitado")
-                setShowPopUp(false);
-            }
-        })
-    }
-
     useEffect(() => {
         console.log(user, isConnected, address)
         if (user) return;
@@ -90,6 +53,7 @@ export default function Profile() {
     const contribute = async (house: HousesProps, e: any) => {
         e.preventDefault()
         const amount = e.target[0].value;
+        setIsLoading(true)
         if (amount) {
             try {
                 const { hash } = await writeContract({
@@ -102,10 +66,12 @@ export default function Profile() {
                         value: amount,
                     },
                 })
+                setIsLoading(false)
                 console.log(hash);
             } catch (e) {
                 toast.error('Oops! Ocurrio un error al realizar un aporte.');
                 console.log("Error aportando: ", e)
+                setIsLoading(false)
             }
         }
     }
@@ -120,13 +86,14 @@ export default function Profile() {
                 args: [house.id],
             })
             if (hash) {
+                setIsLoading(false)
                 axios.post(`/api/house`, { id: house.id })
                     .then(response => {
                         console.log("se actualizo: ", response)
                     }).catch(e => console.log("Error al actualizar las houses"))
             }
-            console.log(hash);
         } catch (e) {
+            setIsLoading(false)
             toast.error('Oops! Ocurrio un error liberando tu leasing.');
             console.log(e)
         }
@@ -141,7 +108,6 @@ export default function Profile() {
             </Head>
             <main className={styles.main}>
                 <Loading loading={isLoading} />
-                <Popup show={showPopUp} myHouse={myHouse} />
                 <Navbar page={"profile"} />
                 {!isLoading && (userExist && <div className={styles.main_body}>
                     <h2>Mis inmuebles</h2>

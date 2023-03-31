@@ -38,18 +38,35 @@ export default function Home() {
       onAccept: async () => {
         setIsLoading(true)
         setShowPopUp(false);
+        const data = await readBlockchain(house.id)
+        let newPrice;
+        let functionUsed;
+        if (data[5]?._hex) {
+          newPrice =  parseInt(data[5]?._hex)
+          functionUsed = "getLeasingFromSecondaryMarket"
+        }
+        else {
+          newPrice =  parseInt(data[6]?._hex)
+          functionUsed = "lockLeasingRigth"
+        }
+        console.log(newPrice)
         try {
-
           const { hash } = await writeContract({
             mode: 'recklesslyUnprepared',
             abi: contractInfo.abi,
             address: contractInfo.address as `0x${string}`,
-            functionName: 'lockLeasingRigth',
+            functionName: functionUsed,
             args: [house.id],
             overrides: {
-              value: house.minimumContribution,
+              value: newPrice,
             },
           })
+          if (hash) {
+            axios.post(`/api/house`, { id: house.id, address: user.address })
+              .then(response => {
+                console.log("se actualizo: ", response)
+              }).catch(e => console.log("Error al actualizar las houses"))
+          }
           console.log(hash);
         } catch (e: any) {
           toast.error('Error al realizar la separación del leasing.');
@@ -58,6 +75,16 @@ export default function Home() {
         setIsLoading(false)
       }
     })
+  }
+
+  const readBlockchain = async (id: number) => {
+    const data = await readContract({
+      address: contractInfo.address as `0x${string}`,
+      abi: contractInfo.abi,
+      functionName: 'leasingRigthsMap',
+      args: [id],
+    })
+    return data
   }
 
   useEffect(() => {
@@ -75,6 +102,9 @@ export default function Home() {
           axios.get(`/api/house`)
             .then(response => {
               const housesApi = response.data
+
+
+
               setHouses(housesApi.houses);
               setIsLoading(false);
             })

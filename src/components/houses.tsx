@@ -15,7 +15,6 @@ type HomeBodyProps = {
 }
 
 const HousesProfile: React.FC<HomeBodyProps> = ({ houses, contribute, yieldHouse }) => {
-    console.log(houses)
     return <>
         <div className={styles.house_body}>
             {houses && (
