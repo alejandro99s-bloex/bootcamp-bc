@@ -5,6 +5,8 @@
   "function getLeasingFromSecondaryMarket(uint256) payable",
   "function lockLeasingRigth(uint256) payable",
   "function pause()",
+  "function reset()",
   "function unpause()",
+  "function withdrawAll()",
   "function yieldLeasingRigth(uint256)"
 ]

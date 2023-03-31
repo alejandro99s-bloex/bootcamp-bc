@@ -130,6 +130,23 @@ function fulfill(bytes32 _requestId, uint256 _volume) external nonpayable
 | _requestId | bytes32 | The ID of the Chainlink request. |
 | _volume | uint256 | The volume data returned by the API. |
 
+### getCurrentTokenId
+
+```solidity
+function getCurrentTokenId() external view returns (uint256)
+```
+
+
+
+*Returns the current token ID.*
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
 ### getLeasingFromSecondaryMarket
 
 ```solidity
@@ -317,23 +334,6 @@ function renounceRole(bytes32 role, address account) external nonpayable
 | role | bytes32 | undefined |
 | account | address | undefined |
 
-### requestVolumeData
-
-```solidity
-function requestVolumeData() external nonpayable returns (bytes32 requestId)
-```
-
-
-
-*Requests volume data from the Chainlink node and returns the requestId.*
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| requestId | bytes32 | The ID of the Chainlink request. |
-
 ### reset
 
 ```solidity
@@ -342,7 +342,7 @@ function reset() external nonpayable
 
 
 
-
+*Allows to reset the contract to its initial state. Only for development purposes.*
 
 
 ### revokeRole
@@ -419,7 +419,7 @@ function withdrawAll() external nonpayable
 
 
 
-
+*Allows to withdraw all the funds from the contract. Only for development purposes.*
 
 
 ### withdrawLink

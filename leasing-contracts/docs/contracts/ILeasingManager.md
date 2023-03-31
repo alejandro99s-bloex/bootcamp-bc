@@ -111,10 +111,32 @@ function pause() external nonpayable
 
 
 
+### reset
+
+```solidity
+function reset() external nonpayable
+```
+
+
+
+
+
+
 ### unpause
 
 ```solidity
 function unpause() external nonpayable
+```
+
+
+
+
+
+
+### withdrawAll
+
+```solidity
+function withdrawAll() external nonpayable
 ```
 
 
