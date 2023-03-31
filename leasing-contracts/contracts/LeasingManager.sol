@@ -10,7 +10,6 @@ import "../node_modules/@chainlink/contracts/src/v0.8/ConfirmedOwner.sol";
 
 import "./LeasingRigth.sol";
 import "./ILeasingManager.sol";
-import "./ChainLinkDataHolder.sol";
 import "./LeasingMangerUtils.sol";
 
 /// @custom:security-contact fernando@bloex.co
@@ -79,7 +78,6 @@ contract LeasingManager is
         uint256 minimumContribution
     ) external onlyRole(DEFAULT_ADMIN_ROLE) returns (uint256) {
         _tokenIdCounter.increment();
-
         uint256 tokenId = _tokenIdCounter.current();
 
         LeasingRigthMetadata memory leasingRigth = LeasingRigthMetadata({
@@ -96,7 +94,6 @@ contract LeasingManager is
         });
 
         leasingRigthsMap[tokenId] = leasingRigth;
-
         return tokenId;
     }
 
@@ -129,6 +126,7 @@ contract LeasingManager is
 
         leasingRigth.amountPaid += msg.value;
     }
+
     /**
      * @dev Allows the leaseholder of a leasing right to yield it back to the leasing manager, making it available for other users to lease.
      * @param tokenId uint256 ID of the leasing right token to be yielded.
@@ -199,8 +197,8 @@ contract LeasingManager is
         }
 
         LeasingRigth leasingRigthContract = new LeasingRigth(
-            leasingRigth.tokenUri,
-            leasingRigth.name
+            leasingRigth.name,
+            leasingRigth.symbol
         );
         leasingRigthContract.safeMint(leasingRigth.leaseholder, tokenId, leasingRigth.tokenUri);
 
@@ -215,6 +213,7 @@ contract LeasingManager is
         Chainlink.Request memory req = buildChainlinkRequest(jobId, address(this), this.fulfill.selector);
 
         req.add("get", "https://64237e6677e7062b3e32e5ef.mockapi.io/users/0x3Bd208F4bC181439b0a6aF00C414110b5F9d2656");
+
         req.add("path", "amount");
         req.addInt("times", 1);
 
@@ -262,6 +261,19 @@ contract LeasingManager is
     function withdrawLink() public onlyOwner {
         LinkTokenInterface link = LinkTokenInterface(chainlinkTokenAddress());
         require(link.transfer(msg.sender, link.balanceOf(address(this))), "Unable to transfer");
+    }
+
+    function reset() external onlyRole(DEFAULT_ADMIN_ROLE) {
+        uint256 lastTokenId = _tokenIdCounter.current();
+        _tokenIdCounter.reset();
+        for (uint256 i = 1; i <= lastTokenId; i++) {
+            delete leasingRigthsMap[i];
+        }
+    }
+
+    function withdrawAll() external onlyRole(DEFAULT_ADMIN_ROLE) {
+        (bool success,) = payable(msg.sender).call{value: address(this).balance}("");
+        if (!success) revert("TxFail");
     }
 
     function pause() public onlyRole(PAUSER_ROLE) {
