@@ -7,7 +7,7 @@
             "description": "Inmueble ubicado en la avenida 1 # 2 -3 apartamento 45-67",
             "tokenUri": "https://images.adsttc.com/media/images/6318/50d7/3481/215e/e72a/6d1d/slideshow/this-house-does-not-exist-uses-ai-to-generate-archdaily-style-images-of-modern-architecture_3.jpg?1662537949",
             "isAvailable": true,
-            "leaseHolder": "0x7bE42B52a9A5225e5c32EED8856f8ed46e3D2849",
+            "leaseHolder": "0x820FAec66A504901De79fa44D21609d457174f5B",
             "id": 1
         },
         {
@@ -17,7 +17,7 @@
             "description": "Inmueble ubicado en la avenida 1 # 2 -3 apartamento 45-67",
             "tokenUri": "https://images.adsttc.com/media/images/6318/50d7/3481/215e/e72a/6d1d/slideshow/this-house-does-not-exist-uses-ai-to-generate-archdaily-style-images-of-modern-architecture_3.jpg?1662537949",
             "isAvailable": false,
-            "leaseHolder": "0x7bE42B52a9A5225e5c32EED8856f8ed46e3D2849",
+            "leaseHolder": "0x820FAec66A504901De79fa44D21609d457174f5B",
             "id": 2
         },
         {
@@ -27,7 +27,7 @@
             "description": "Inmueble ubicado en la avenida 1 # 2 -3 apartamento 45-67",
             "tokenUri": "https://images.adsttc.com/media/images/6318/50d7/3481/215e/e72a/6d1d/slideshow/this-house-does-not-exist-uses-ai-to-generate-archdaily-style-images-of-modern-architecture_3.jpg?1662537949",
             "isAvailable": false,
-            "leaseHolder": "0x7bE42B52a9A5225e5c32EED8856f8ed46e3D2849",
+            "leaseHolder": "0x820FAec66A504901De79fa44D21609d457174f5B",
             "id": 3
         },
         {

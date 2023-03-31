@@ -9,9 +9,10 @@ import { User, HousesProps, MyHouse } from "../types/index";
 import Loading from '@/components/loading'
 import HomeBody from '@/components/home'
 import Popup from '@/components/modal'
-import { readContract, writeContract  } from '@wagmi/core'
+import { readContract, writeContract } from '@wagmi/core'
 import contractInfo from "../../contractInfo/contract.json";
-
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 const inter = Inter({ subsets: ['latin'] })
 
 export default function Home() {
@@ -25,49 +26,46 @@ export default function Home() {
 
   const tryToBuy = (house: HousesProps, user: User) => {
     setShowPopUp(true)
-    setMyHouse({ 
-      tokenUri: house.tokenUri, 
-      description: `${house.name}: ${house.description}.\n¿Te gusta este inmueble?`, 
+    setMyHouse({
+      tokenUri: house.tokenUri,
+      description: `${house.name}: ${house.description}.\n¿Te gusta este inmueble?`,
       buttonOk: "Solicitar",
       buttonCancel: "Cancelar",
       onCancel: () => {
         console.log("canceled")
         setShowPopUp(false);
-      }, 
+      },
       onAccept: async () => {
-        console.log("Leasing solicitado")
-        console.log({
-          mode: 'recklesslyUnprepared',
-          abi: contractInfo.abi,
-          address: contractInfo.address as `0x${string}`,
-          functionName: 'lockLeasingRigth',
-          args: [house.id],
-          overrides: {
-            value: house.minimumContribution,
-          },
-        })
-        const { hash } = await writeContract({
-          mode: 'recklesslyUnprepared',
-          abi: contractInfo.abi,
-          address: contractInfo.address as `0x${string}`,
-          functionName: 'lockLeasingRigth',
-          args: [house.id],
-          overrides: {
-            value: house.minimumContribution,
-          },
-        })
-        console.log(hash);
+        setIsLoading(true)
         setShowPopUp(false);
+        try {
 
-        
-      } 
+          const { hash } = await writeContract({
+            mode: 'recklesslyUnprepared',
+            abi: contractInfo.abi,
+            address: contractInfo.address as `0x${string}`,
+            functionName: 'lockLeasingRigth',
+            args: [house.id],
+            overrides: {
+              value: house.minimumContribution,
+            },
+          })
+          console.log(hash);
+        } catch (e: any) {
+          toast.error('Error al realizar la separación del leasing.');
+          console.log("El error es: ", e.message)
+        }
+        setIsLoading(false)
+      }
     })
   }
 
   useEffect(() => {
     console.log(user, isConnected, address)
-    if (user) return;
-    if (!isConnected) return;
+    if (user || !isConnected) {
+      setIsLoading(false)
+      return;
+    }
     if (address) {
       axios.get(`/api/user/?address=${address}`)
         .then(response => {
@@ -90,6 +88,9 @@ export default function Home() {
           console.log("El error es: ", error.response.data.message)
           setIsLoading(false);
         });
+
+    } else {
+      setIsLoading(false);
     }
   }, [address])
   return (
@@ -103,8 +104,8 @@ export default function Home() {
       <main className={styles.main}>
         <Loading loading={isLoading} />
         <Popup show={showPopUp} myHouse={myHouse} />
-        <Navbar />
-        {!isLoading && (userExist ? <div className={styles.main_body}>
+        <Navbar page={"index"} />
+        {!isLoading && ((userExist && address) ? <div className={styles.main_body}>
           <p className={styles.main_p}>
             A continuación, verás en verde las viviendas que puedes adquirir mediante
             el servicio de leasing inmobiliario de Bancolombia, si está en rojo no te
@@ -112,11 +113,12 @@ export default function Home() {
             metas, en Bancolombia estamos para apoyarte en tu camino
           </p>
           <HomeBody houses={houses} user={user} tryToBuy={tryToBuy} />
-        </div> : <p> Te invitamos a acercarte a las oficinas de Bancolombia para
+        </div> : address ? <p> Te invitamos a acercarte a las oficinas de Bancolombia para
           completar tu registro, de esta manera podrás acceder a este y más
           beneficios.
+        </p> : <p>Te invitamos a conectar tu wallet para acceder a los beneficios
+          Bancolombia
         </p>)}
-
       </main>
     </>
   )

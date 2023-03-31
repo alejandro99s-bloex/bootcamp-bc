@@ -10,8 +10,10 @@ import Loading from '@/components/loading'
 import HomeBody from '@/components/home'
 import Popup from '@/components/modal'
 import HousesProfile from '@/components/houses'
-import { readContract, writeContract  } from '@wagmi/core'
+import { readContract, writeContract } from '@wagmi/core'
 import contractInfo from "../../../contractInfo/contract.json";
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -85,19 +87,49 @@ export default function Profile() {
         }
     }, [address])
 
-    const contribute = async(house: HousesProps) => {
-        console.log(house)
-        const { hash } = await writeContract({
-          mode: 'recklesslyUnprepared',
-          abi: contractInfo.abi,
-          address: contractInfo.address as `0x${string}`,
-          functionName: 'contribute',
-          args: [house.id],
-          overrides: {
-            value: 200,
-          },
-        })
-        console.log(hash);
+    const contribute = async (house: HousesProps, e: any) => {
+        e.preventDefault()
+        const amount = e.target[0].value;
+        if (amount) {
+            try {
+                const { hash } = await writeContract({
+                    mode: 'recklesslyUnprepared',
+                    abi: contractInfo.abi,
+                    address: contractInfo.address as `0x${string}`,
+                    functionName: 'contribute',
+                    args: [house.id],
+                    overrides: {
+                        value: amount,
+                    },
+                })
+                console.log(hash);
+            } catch (e) {
+                toast.error('Oops! Ocurrio un error al realizar un aporte.');
+                console.log("Error aportando: ", e)
+            }
+        }
+    }
+
+    const yieldHouse = async (house: HousesProps) => {
+        try {
+            const { hash } = await writeContract({
+                mode: 'recklesslyUnprepared',
+                abi: contractInfo.abi,
+                address: contractInfo.address as `0x${string}`,
+                functionName: 'yieldLeasingRigth',
+                args: [house.id],
+            })
+            if (hash) {
+                axios.post(`/api/house`, { id: house.id })
+                    .then(response => {
+                        console.log("se actualizo: ", response)
+                    }).catch(e => console.log("Error al actualizar las houses"))
+            }
+            console.log(hash);
+        } catch (e) {
+            toast.error('Oops! Ocurrio un error liberando tu leasing.');
+            console.log(e)
+        }
     }
     return (
         <>
@@ -110,10 +142,10 @@ export default function Profile() {
             <main className={styles.main}>
                 <Loading loading={isLoading} />
                 <Popup show={showPopUp} myHouse={myHouse} />
-                <Navbar />
+                <Navbar page={"profile"} />
                 {!isLoading && (userExist && <div className={styles.main_body}>
                     <h2>Mis inmuebles</h2>
-                    <HousesProfile houses={houses} contribute={contribute}/>
+                    <HousesProfile houses={houses} contribute={contribute} yieldHouse={yieldHouse} />
                 </div>)}
 
             </main>

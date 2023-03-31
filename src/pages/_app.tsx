@@ -9,6 +9,8 @@ import { configureChains, createClient, WagmiConfig } from 'wagmi';
 import { polygonMumbai } from 'wagmi/chains';
 import { alchemyProvider } from 'wagmi/providers/alchemy';
 import { publicProvider } from 'wagmi/providers/public';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const { chains, provider } = configureChains(
   [polygonMumbai],
@@ -32,6 +34,7 @@ const wagmiClient = createClient({
 export default function App({ Component, pageProps }: AppProps) {
   return <WagmiConfig client={wagmiClient}>
     <RainbowKitProvider chains={chains}>
+      <ToastContainer />
       <Component {...pageProps} />
     </RainbowKitProvider>
   </WagmiConfig>
