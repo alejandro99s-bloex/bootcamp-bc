@@ -76,7 +76,7 @@ contract LeasingManager is
         string memory symbol,
         uint256 price,
         uint256 minimumContribution
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) returns (uint256) {
+    ) external whenNotPaused onlyRole(DEFAULT_ADMIN_ROLE) returns (uint256) {
         _tokenIdCounter.increment();
         uint256 tokenId = _tokenIdCounter.current();
 
@@ -107,6 +107,7 @@ contract LeasingManager is
     function lockLeasingRigth(uint256 leasingId) external payable override whenNotPaused {
         LeasingRigthMetadata memory leasingRigth = leasingRigthsMap[leasingId];
 
+        require(leasingRigth.leaseholder == address(0), "LeasingManager: rigth is not available");
         require(leasingRigth.isAvailable, "LeasingManager: rigth is not available");
         require(msg.value >= leasingRigth.minimumContribution, "LeasingManager: minimum contribution required");
 
@@ -186,7 +187,7 @@ contract LeasingManager is
      * A new instance of the LeasingRigth contract is created, minting a new NFT with the same tokenUri and name as the original leasing right.
      * The new leasing right is assigned to the caller and its address is stored in leasingRigth.leasingRigthAddress.
      */
-    function claimLeasingRigth(uint256 tokenId) external nonReentrant onlyLeaseholder(tokenId) {
+    function claimLeasingRigth(uint256 tokenId) external nonReentrant whenNotPaused onlyLeaseholder(tokenId) {
         LeasingRigthMetadata storage leasingRigth = leasingRigthsMap[tokenId];
         require(leasingRigth.amountPaid >= leasingRigth.price, "LeasingManager: amount paid is less than price");
 
@@ -209,7 +210,7 @@ contract LeasingManager is
      * @dev Requests volume data from the Chainlink node and returns the requestId.
      * @return requestId The ID of the Chainlink request.
      */
-    function requestVolumeData() public returns (bytes32 requestId) {
+    function requestVolumeData() internal returns (bytes32 requestId) {
         Chainlink.Request memory req = buildChainlinkRequest(jobId, address(this), this.fulfill.selector);
 
         req.add("get", "https://64237e6677e7062b3e32e5ef.mockapi.io/users/0x3Bd208F4bC181439b0a6aF00C414110b5F9d2656");
@@ -263,6 +264,12 @@ contract LeasingManager is
         require(link.transfer(msg.sender, link.balanceOf(address(this))), "Unable to transfer");
     }
 
+    /// @dev Returns the current token ID.
+    function getCurrentTokenId() public view returns (uint256) {
+        return _tokenIdCounter.current();
+    }
+
+    /// @dev Allows to reset the contract to its initial state. Only for development purposes.
     function reset() external onlyRole(DEFAULT_ADMIN_ROLE) {
         uint256 lastTokenId = _tokenIdCounter.current();
         _tokenIdCounter.reset();
@@ -271,6 +278,7 @@ contract LeasingManager is
         }
     }
 
+    /// @dev Allows to withdraw all the funds from the contract. Only for development purposes.
     function withdrawAll() external onlyRole(DEFAULT_ADMIN_ROLE) {
         (bool success,) = payable(msg.sender).call{value: address(this).balance}("");
         if (!success) revert("TxFail");
