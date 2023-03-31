@@ -1,5 +1,13 @@
 # LeasingManager
 
+
+
+
+
+
+
+
+
 ## Methods
 
 ### DEFAULT_ADMIN_ROLE
@@ -8,11 +16,16 @@
 function DEFAULT_ADMIN_ROLE() external view returns (bytes32)
 ```
 
+
+
+
+
+
 #### Returns
 
-| Name | Type    | Description |
-| ---- | ------- | ----------- |
-| \_0  | bytes32 | undefined   |
+| Name | Type | Description |
+|---|---|---|
+| _0 | bytes32 | undefined |
 
 ### PAUSER_ROLE
 
@@ -20,11 +33,16 @@ function DEFAULT_ADMIN_ROLE() external view returns (bytes32)
 function PAUSER_ROLE() external view returns (bytes32)
 ```
 
+
+
+
+
+
 #### Returns
 
-| Name | Type    | Description |
-| ---- | ------- | ----------- |
-| \_0  | bytes32 | undefined   |
+| Name | Type | Description |
+|---|---|---|
+| _0 | bytes32 | undefined |
 
 ### acceptOwnership
 
@@ -34,6 +52,9 @@ function acceptOwnership() external nonpayable
 
 Allows an ownership transfer to be completed by the recipient.
 
+
+
+
 ### addLeasingRigth
 
 ```solidity
@@ -42,23 +63,23 @@ function addLeasingRigth(string tokenUri, string name, string symbol, uint256 pr
 
 Create new leasing rigth and return the id
 
-_Can be called only by the EOA with the DEFAULT_ADMIN_ROLE role_
+*Can be called only by the EOA with the DEFAULT_ADMIN_ROLE role*
 
 #### Parameters
 
-| Name                | Type    | Description                                        |
-| ------------------- | ------- | -------------------------------------------------- |
-| tokenUri            | string  | The token URI of the NFT                           |
-| name                | string  | The name of the NFT                                |
-| symbol              | string  | The symbol of the NFT                              |
-| price               | uint256 | The price of the leasing rigth                     |
+| Name | Type | Description |
+|---|---|---|
+| tokenUri | string | The token URI of the NFT |
+| name | string | The name of the NFT |
+| symbol | string | The symbol of the NFT |
+| price | uint256 | The price of the leasing rigth |
 | minimumContribution | uint256 | The minimum contribution to lock the leasing rigth |
 
 #### Returns
 
-| Name | Type    | Description                             |
-| ---- | ------- | --------------------------------------- |
-| \_0  | uint256 | tokenId The id of the new leasing rigth |
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | tokenId The id of the new leasing rigth |
 
 ### claimLeasingRigth
 
@@ -66,12 +87,14 @@ _Can be called only by the EOA with the DEFAULT_ADMIN_ROLE role_
 function claimLeasingRigth(uint256 tokenId) external nonpayable
 ```
 
-_Allows the current leaseholder of a leasing right to claim ownership of the underlying NFT only when the price is reached._
+
+
+*Allows the current leaseholder of a leasing right to claim ownership of the underlying NFT only when the price is reached.*
 
 #### Parameters
 
-| Name    | Type    | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| ------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Name | Type | Description |
+|---|---|---|
 | tokenId | uint256 | uint256 ID of the leasing right to claim. Requirements: The caller must be the current leaseholder of the leasing right. The amount paid must be greater than or equal to the price of the leasing right. Effects: The caller receives ownership of the underlying NFT. If the amount paid exceeds the price of the leasing right, the excess is refunded to the caller. A new instance of the LeasingRigth contract is created, minting a new NFT with the same tokenUri and name as the original leasing right. The new leasing right is assigned to the caller and its address is stored in leasingRigth.leasingRigthAddress. |
 
 ### contribute
@@ -80,12 +103,14 @@ _Allows the current leaseholder of a leasing right to claim ownership of the und
 function contribute(uint256 tokenId) external payable
 ```
 
-_Allows the leaseholder of a token to contribute additional funds to the leasing right paiying until the price is reached._
+
+
+*Allows the leaseholder of a token to contribute additional funds to the leasing right paiying until the price is reached.*
 
 #### Parameters
 
-| Name    | Type    | Description                                         |
-| ------- | ------- | --------------------------------------------------- |
+| Name | Type | Description |
+|---|---|---|
 | tokenId | uint256 | The ID of the leasing right token to contribute to. |
 
 ### fulfill
@@ -94,14 +119,16 @@ _Allows the leaseholder of a token to contribute additional funds to the leasing
 function fulfill(bytes32 _requestId, uint256 _volume) external nonpayable
 ```
 
-_Callback function that is called by the Chainlink node to fulfill the volume data request._
+
+
+*Callback function that is called by the Chainlink node to fulfill the volume data request.*
 
 #### Parameters
 
-| Name        | Type    | Description                          |
-| ----------- | ------- | ------------------------------------ |
-| \_requestId | bytes32 | The ID of the Chainlink request.     |
-| \_volume    | uint256 | The volume data returned by the API. |
+| Name | Type | Description |
+|---|---|---|
+| _requestId | bytes32 | The ID of the Chainlink request. |
+| _volume | uint256 | The volume data returned by the API. |
 
 ### getLeasingFromSecondaryMarket
 
@@ -109,12 +136,14 @@ _Callback function that is called by the Chainlink node to fulfill the volume da
 function getLeasingFromSecondaryMarket(uint256 tokenId) external payable
 ```
 
-_Allows a user to acquire a leasing right from the secondary market. The user must provide the ID of the leasing right to acquire and pay the required price. The function will refund any excess payment above the price of the leasing right to the previous leaseholder. The leasing right must be available for acquisition and the amount paid must be equal or greater than the amount paid by the previous leaseholder._
+
+
+*Allows a user to acquire a leasing right from the secondary market. The user must provide the ID of the leasing right to acquire and pay the required price. The function will refund any excess payment above the price of the leasing right to the previous leaseholder. The leasing right must be available for acquisition and the amount paid must be equal or greater than the amount paid by the previous leaseholder.*
 
 #### Parameters
 
-| Name    | Type    | Description                             |
-| ------- | ------- | --------------------------------------- |
+| Name | Type | Description |
+|---|---|---|
 | tokenId | uint256 | The ID of the leasing right to acquire. |
 
 ### getRoleAdmin
@@ -123,19 +152,21 @@ _Allows a user to acquire a leasing right from the secondary market. The user mu
 function getRoleAdmin(bytes32 role) external view returns (bytes32)
 ```
 
-_Returns the admin role that controls `role`. See {grantRole} and {revokeRole}. To change a role&#39;s admin, use {\_setRoleAdmin}._
+
+
+*Returns the admin role that controls `role`. See {grantRole} and {revokeRole}. To change a role&#39;s admin, use {_setRoleAdmin}.*
 
 #### Parameters
 
-| Name | Type    | Description |
-| ---- | ------- | ----------- |
-| role | bytes32 | undefined   |
+| Name | Type | Description |
+|---|---|---|
+| role | bytes32 | undefined |
 
 #### Returns
 
-| Name | Type    | Description |
-| ---- | ------- | ----------- |
-| \_0  | bytes32 | undefined   |
+| Name | Type | Description |
+|---|---|---|
+| _0 | bytes32 | undefined |
 
 ### grantRole
 
@@ -143,14 +174,16 @@ _Returns the admin role that controls `role`. See {grantRole} and {revokeRole}. 
 function grantRole(bytes32 role, address account) external nonpayable
 ```
 
-_Grants `role` to `account`. If `account` had not been already granted `role`, emits a {RoleGranted} event. Requirements: - the caller must have `role`&#39;s admin role. May emit a {RoleGranted} event._
+
+
+*Grants `role` to `account`. If `account` had not been already granted `role`, emits a {RoleGranted} event. Requirements: - the caller must have ``role``&#39;s admin role. May emit a {RoleGranted} event.*
 
 #### Parameters
 
-| Name    | Type    | Description |
-| ------- | ------- | ----------- |
-| role    | bytes32 | undefined   |
-| account | address | undefined   |
+| Name | Type | Description |
+|---|---|---|
+| role | bytes32 | undefined |
+| account | address | undefined |
 
 ### hasRole
 
@@ -158,20 +191,22 @@ _Grants `role` to `account`. If `account` had not been already granted `role`, e
 function hasRole(bytes32 role, address account) external view returns (bool)
 ```
 
-_Returns `true` if `account` has been granted `role`._
+
+
+*Returns `true` if `account` has been granted `role`.*
 
 #### Parameters
 
-| Name    | Type    | Description |
-| ------- | ------- | ----------- |
-| role    | bytes32 | undefined   |
-| account | address | undefined   |
+| Name | Type | Description |
+|---|---|---|
+| role | bytes32 | undefined |
+| account | address | undefined |
 
 #### Returns
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| \_0  | bool | undefined   |
+|---|---|---|
+| _0 | bool | undefined |
 
 ### leasingRigthsMap
 
@@ -179,26 +214,30 @@ _Returns `true` if `account` has been granted `role`._
 function leasingRigthsMap(uint256) external view returns (uint256 leasingRigthId, string tokenUri, string name, string symbol, uint256 price, uint256 amountPaid, uint256 minimumContribution, address leaseholder, bool isAvailable, address leasingRigthAddress)
 ```
 
+
+
+
+
 #### Parameters
 
-| Name | Type    | Description |
-| ---- | ------- | ----------- |
-| \_0  | uint256 | undefined   |
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
 
 #### Returns
 
-| Name                | Type    | Description |
-| ------------------- | ------- | ----------- |
-| leasingRigthId      | uint256 | undefined   |
-| tokenUri            | string  | undefined   |
-| name                | string  | undefined   |
-| symbol              | string  | undefined   |
-| price               | uint256 | undefined   |
-| amountPaid          | uint256 | undefined   |
-| minimumContribution | uint256 | undefined   |
-| leaseholder         | address | undefined   |
-| isAvailable         | bool    | undefined   |
-| leasingRigthAddress | address | undefined   |
+| Name | Type | Description |
+|---|---|---|
+| leasingRigthId | uint256 | undefined |
+| tokenUri | string | undefined |
+| name | string | undefined |
+| symbol | string | undefined |
+| price | uint256 | undefined |
+| amountPaid | uint256 | undefined |
+| minimumContribution | uint256 | undefined |
+| leaseholder | address | undefined |
+| isAvailable | bool | undefined |
+| leasingRigthAddress | address | undefined |
 
 ### lockLeasingRigth
 
@@ -208,12 +247,12 @@ function lockLeasingRigth(uint256 leasingId) external payable
 
 Locks a leasing right identified by `leasingId` and stores relevant data in cache.
 
-_The caller must send a minimum contribution equal to or greater than the `minimumContribution` required by the leasing right.The leasing right must be available for locking, otherwise a `LeasingManager: rigth is not available` error is thrown.Must be called when the contract is not paused._
+*The caller must send a minimum contribution equal to or greater than the `minimumContribution` required by the leasing right.The leasing right must be available for locking, otherwise a `LeasingManager: rigth is not available` error is thrown.Must be called when the contract is not paused.*
 
 #### Parameters
 
-| Name      | Type    | Description                          |
-| --------- | ------- | ------------------------------------ |
+| Name | Type | Description |
+|---|---|---|
 | leasingId | uint256 | The ID of the leasing right to lock. |
 
 ### owner
@@ -224,11 +263,14 @@ function owner() external view returns (address)
 
 Get the current owner
 
+
+
+
 #### Returns
 
-| Name | Type    | Description |
-| ---- | ------- | ----------- |
-| \_0  | address | undefined   |
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
 
 ### pause
 
@@ -236,19 +278,27 @@ Get the current owner
 function pause() external nonpayable
 ```
 
+
+
+
+
+
 ### paused
 
 ```solidity
 function paused() external view returns (bool)
 ```
 
-_Returns true if the contract is paused, and false otherwise._
+
+
+*Returns true if the contract is paused, and false otherwise.*
+
 
 #### Returns
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| \_0  | bool | undefined   |
+|---|---|---|
+| _0 | bool | undefined |
 
 ### renounceRole
 
@@ -256,14 +306,16 @@ _Returns true if the contract is paused, and false otherwise._
 function renounceRole(bytes32 role, address account) external nonpayable
 ```
 
-_Revokes `role` from the calling account. Roles are often managed via {grantRole} and {revokeRole}: this function&#39;s purpose is to provide a mechanism for accounts to lose their privileges if they are compromised (such as when a trusted device is misplaced). If the calling account had been revoked `role`, emits a {RoleRevoked} event. Requirements: - the caller must be `account`. May emit a {RoleRevoked} event._
+
+
+*Revokes `role` from the calling account. Roles are often managed via {grantRole} and {revokeRole}: this function&#39;s purpose is to provide a mechanism for accounts to lose their privileges if they are compromised (such as when a trusted device is misplaced). If the calling account had been revoked `role`, emits a {RoleRevoked} event. Requirements: - the caller must be `account`. May emit a {RoleRevoked} event.*
 
 #### Parameters
 
-| Name    | Type    | Description |
-| ------- | ------- | ----------- |
-| role    | bytes32 | undefined   |
-| account | address | undefined   |
+| Name | Type | Description |
+|---|---|---|
+| role | bytes32 | undefined |
+| account | address | undefined |
 
 ### requestVolumeData
 
@@ -271,13 +323,27 @@ _Revokes `role` from the calling account. Roles are often managed via {grantRole
 function requestVolumeData() external nonpayable returns (bytes32 requestId)
 ```
 
-_Requests volume data from the Chainlink node and returns the requestId._
+
+
+*Requests volume data from the Chainlink node and returns the requestId.*
+
 
 #### Returns
 
-| Name      | Type    | Description                      |
-| --------- | ------- | -------------------------------- |
+| Name | Type | Description |
+|---|---|---|
 | requestId | bytes32 | The ID of the Chainlink request. |
+
+### reset
+
+```solidity
+function reset() external nonpayable
+```
+
+
+
+
+
 
 ### revokeRole
 
@@ -285,14 +351,16 @@ _Requests volume data from the Chainlink node and returns the requestId._
 function revokeRole(bytes32 role, address account) external nonpayable
 ```
 
-_Revokes `role` from `account`. If `account` had been granted `role`, emits a {RoleRevoked} event. Requirements: - the caller must have `role`&#39;s admin role. May emit a {RoleRevoked} event._
+
+
+*Revokes `role` from `account`. If `account` had been granted `role`, emits a {RoleRevoked} event. Requirements: - the caller must have ``role``&#39;s admin role. May emit a {RoleRevoked} event.*
 
 #### Parameters
 
-| Name    | Type    | Description |
-| ------- | ------- | ----------- |
-| role    | bytes32 | undefined   |
-| account | address | undefined   |
+| Name | Type | Description |
+|---|---|---|
+| role | bytes32 | undefined |
+| account | address | undefined |
 
 ### supportsInterface
 
@@ -300,19 +368,21 @@ _Revokes `role` from `account`. If `account` had been granted `role`, emits a {R
 function supportsInterface(bytes4 interfaceId) external view returns (bool)
 ```
 
-_See {IERC165-supportsInterface}._
+
+
+*See {IERC165-supportsInterface}.*
 
 #### Parameters
 
-| Name        | Type   | Description |
-| ----------- | ------ | ----------- |
-| interfaceId | bytes4 | undefined   |
+| Name | Type | Description |
+|---|---|---|
+| interfaceId | bytes4 | undefined |
 
 #### Returns
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| \_0  | bool | undefined   |
+|---|---|---|
+| _0 | bool | undefined |
 
 ### transferOwnership
 
@@ -322,11 +392,13 @@ function transferOwnership(address to) external nonpayable
 
 Allows an owner to begin transferring ownership to a new address, pending.
 
+
+
 #### Parameters
 
-| Name | Type    | Description |
-| ---- | ------- | ----------- |
-| to   | address | undefined   |
+| Name | Type | Description |
+|---|---|---|
+| to | address | undefined |
 
 ### unpause
 
@@ -334,13 +406,32 @@ Allows an owner to begin transferring ownership to a new address, pending.
 function unpause() external nonpayable
 ```
 
+
+
+
+
+
+### withdrawAll
+
+```solidity
+function withdrawAll() external nonpayable
+```
+
+
+
+
+
+
 ### withdrawLink
 
 ```solidity
 function withdrawLink() external nonpayable
 ```
 
-_Withdraws any remaining LINK tokens from the contract_
+
+
+*Withdraws any remaining LINK tokens from the contract*
+
 
 ### yieldLeasingRigth
 
@@ -348,13 +439,17 @@ _Withdraws any remaining LINK tokens from the contract_
 function yieldLeasingRigth(uint256 tokenId) external nonpayable
 ```
 
-_Allows the leaseholder of a leasing right to yield it back to the leasing manager, making it available for other users to lease._
+
+
+*Allows the leaseholder of a leasing right to yield it back to the leasing manager, making it available for other users to lease.*
 
 #### Parameters
 
-| Name    | Type    | Description                                                                                                                                                                                                                                                                                      |
-| ------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Name | Type | Description |
+|---|---|---|
 | tokenId | uint256 | uint256 ID of the leasing right token to be yielded. Requirements: The contract must not be paused. The caller must be the leaseholder of the specified leasing right. Effects: Sets the isAvailable flag of the specified leasing right to true, indicating that it is now available for lease. |
+
+
 
 ## Events
 
@@ -364,11 +459,15 @@ _Allows the leaseholder of a leasing right to yield it back to the leasing manag
 event ChainlinkCancelled(bytes32 indexed id)
 ```
 
+
+
+
+
 #### Parameters
 
-| Name         | Type    | Description |
-| ------------ | ------- | ----------- |
-| id `indexed` | bytes32 | undefined   |
+| Name | Type | Description |
+|---|---|---|
+| id `indexed` | bytes32 | undefined |
 
 ### ChainlinkFulfilled
 
@@ -376,11 +475,15 @@ event ChainlinkCancelled(bytes32 indexed id)
 event ChainlinkFulfilled(bytes32 indexed id)
 ```
 
+
+
+
+
 #### Parameters
 
-| Name         | Type    | Description |
-| ------------ | ------- | ----------- |
-| id `indexed` | bytes32 | undefined   |
+| Name | Type | Description |
+|---|---|---|
+| id `indexed` | bytes32 | undefined |
 
 ### ChainlinkRequested
 
@@ -388,11 +491,15 @@ event ChainlinkFulfilled(bytes32 indexed id)
 event ChainlinkRequested(bytes32 indexed id)
 ```
 
+
+
+
+
 #### Parameters
 
-| Name         | Type    | Description |
-| ------------ | ------- | ----------- |
-| id `indexed` | bytes32 | undefined   |
+| Name | Type | Description |
+|---|---|---|
+| id `indexed` | bytes32 | undefined |
 
 ### OwnershipTransferRequested
 
@@ -400,12 +507,16 @@ event ChainlinkRequested(bytes32 indexed id)
 event OwnershipTransferRequested(address indexed from, address indexed to)
 ```
 
+
+
+
+
 #### Parameters
 
-| Name           | Type    | Description |
-| -------------- | ------- | ----------- |
-| from `indexed` | address | undefined   |
-| to `indexed`   | address | undefined   |
+| Name | Type | Description |
+|---|---|---|
+| from `indexed` | address | undefined |
+| to `indexed` | address | undefined |
 
 ### OwnershipTransferred
 
@@ -413,12 +524,16 @@ event OwnershipTransferRequested(address indexed from, address indexed to)
 event OwnershipTransferred(address indexed from, address indexed to)
 ```
 
+
+
+
+
 #### Parameters
 
-| Name           | Type    | Description |
-| -------------- | ------- | ----------- |
-| from `indexed` | address | undefined   |
-| to `indexed`   | address | undefined   |
+| Name | Type | Description |
+|---|---|---|
+| from `indexed` | address | undefined |
+| to `indexed` | address | undefined |
 
 ### Paused
 
@@ -426,11 +541,15 @@ event OwnershipTransferred(address indexed from, address indexed to)
 event Paused(address account)
 ```
 
+
+
+
+
 #### Parameters
 
-| Name    | Type    | Description |
-| ------- | ------- | ----------- |
-| account | address | undefined   |
+| Name | Type | Description |
+|---|---|---|
+| account  | address | undefined |
 
 ### RequestVolume
 
@@ -438,12 +557,16 @@ event Paused(address account)
 event RequestVolume(bytes32 indexed requestId, uint256 volume)
 ```
 
+
+
+
+
 #### Parameters
 
-| Name                | Type    | Description |
-| ------------------- | ------- | ----------- |
-| requestId `indexed` | bytes32 | undefined   |
-| volume              | uint256 | undefined   |
+| Name | Type | Description |
+|---|---|---|
+| requestId `indexed` | bytes32 | undefined |
+| volume  | uint256 | undefined |
 
 ### RoleAdminChanged
 
@@ -451,13 +574,17 @@ event RequestVolume(bytes32 indexed requestId, uint256 volume)
 event RoleAdminChanged(bytes32 indexed role, bytes32 indexed previousAdminRole, bytes32 indexed newAdminRole)
 ```
 
+
+
+
+
 #### Parameters
 
-| Name                        | Type    | Description |
-| --------------------------- | ------- | ----------- |
-| role `indexed`              | bytes32 | undefined   |
-| previousAdminRole `indexed` | bytes32 | undefined   |
-| newAdminRole `indexed`      | bytes32 | undefined   |
+| Name | Type | Description |
+|---|---|---|
+| role `indexed` | bytes32 | undefined |
+| previousAdminRole `indexed` | bytes32 | undefined |
+| newAdminRole `indexed` | bytes32 | undefined |
 
 ### RoleGranted
 
@@ -465,13 +592,17 @@ event RoleAdminChanged(bytes32 indexed role, bytes32 indexed previousAdminRole, 
 event RoleGranted(bytes32 indexed role, address indexed account, address indexed sender)
 ```
 
+
+
+
+
 #### Parameters
 
-| Name              | Type    | Description |
-| ----------------- | ------- | ----------- |
-| role `indexed`    | bytes32 | undefined   |
-| account `indexed` | address | undefined   |
-| sender `indexed`  | address | undefined   |
+| Name | Type | Description |
+|---|---|---|
+| role `indexed` | bytes32 | undefined |
+| account `indexed` | address | undefined |
+| sender `indexed` | address | undefined |
 
 ### RoleRevoked
 
@@ -479,13 +610,17 @@ event RoleGranted(bytes32 indexed role, address indexed account, address indexed
 event RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender)
 ```
 
+
+
+
+
 #### Parameters
 
-| Name              | Type    | Description |
-| ----------------- | ------- | ----------- |
-| role `indexed`    | bytes32 | undefined   |
-| account `indexed` | address | undefined   |
-| sender `indexed`  | address | undefined   |
+| Name | Type | Description |
+|---|---|---|
+| role `indexed` | bytes32 | undefined |
+| account `indexed` | address | undefined |
+| sender `indexed` | address | undefined |
 
 ### Unpaused
 
@@ -493,8 +628,15 @@ event RoleRevoked(bytes32 indexed role, address indexed account, address indexed
 event Unpaused(address account)
 ```
 
+
+
+
+
 #### Parameters
 
-| Name    | Type    | Description |
-| ------- | ------- | ----------- |
-| account | address | undefined   |
+| Name | Type | Description |
+|---|---|---|
+| account  | address | undefined |
+
+
+

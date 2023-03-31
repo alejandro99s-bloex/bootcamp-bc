@@ -7,7 +7,10 @@ async function main() {
 	const leasingManager = await LeasgingManager.connect(deployer).deploy();
 	await leasingManager.deployed();
 
-	console.log("LeasingManager deployed to:", leasingManager.address);
+	const address = leasingManager.address;
+	console.log(
+		`LeasingManager deployed. Block explorer url: https://mumbai.polygonscan.com/address/${address}`,
+	);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

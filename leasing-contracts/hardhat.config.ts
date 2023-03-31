@@ -9,7 +9,7 @@ dotenv.config();
 
 const privateKey = process.env.PRIVATE_KEY || "";
 const mumbaiRpcUrl = process.env.MUMBAI_RPC_URL || "";
-const mumbaiExplorer = process.env.POLYGONSCAN_API_KEY || "";
+const mumbaiExplorerApiKey = process.env.POLYGONSCAN_API_KEY || "";
 
 const config: HardhatUserConfig = {
 	solidity: {
@@ -29,7 +29,7 @@ const config: HardhatUserConfig = {
 		},
 	},
 	etherscan: {
-		apiKey: mumbaiExplorer,
+		apiKey: mumbaiExplorerApiKey,
 	},
 	abiExporter: {
 		path: "./data/abi",

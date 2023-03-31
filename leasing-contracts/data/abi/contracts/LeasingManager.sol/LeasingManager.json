@@ -29,10 +29,12 @@
   "function paused() view returns (bool)",
   "function renounceRole(bytes32,address)",
   "function requestVolumeData() returns (bytes32)",
+  "function reset()",
   "function revokeRole(bytes32,address)",
   "function supportsInterface(bytes4) view returns (bool)",
   "function transferOwnership(address)",
   "function unpause()",
+  "function withdrawAll()",
   "function withdrawLink()",
   "function yieldLeasingRigth(uint256)"
 ]
